@@ -33,10 +33,10 @@ import (
 )
 
 type Job struct {
-	ID    string // job identifier
+	ID    string   // job identifier
 	Urls  []string // list for download tasks
-	Delay int // expressed in milliseconds
-	Sync  bool // wether the download tasks should be performed sync or async
+	Delay int      // expressed in milliseconds
+	Sync  bool     // wether the download tasks should be performed sync or async
 }
 
 // Wait waits for the duration of j.Delay, coverted into a time duration expressed
