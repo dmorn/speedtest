@@ -7,25 +7,19 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"sync"
 	"time"
-
-	"github.com/danielmorandini/booster/log"
 )
 
-var tt []string = []string{
-	"https://godoc.org/net/http#Transport",
-	"https://ec.haxx.se/usingcurl-proxies.html#socks",
-}
-
 type Job struct {
-	ID   string
-	Urls []string
+	ID    string
+	Urls  []string
 	Delay time.Duration
-	Sync bool
+	Sync  bool
 }
 
 var input = flag.String("job", "job.json", "input job file formatted in json")
