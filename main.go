@@ -33,14 +33,21 @@ import (
 )
 
 type Job struct {
-	ID    string
-	Urls  []string
-	Delay time.Duration
-	Sync  bool
+	ID    string // job identifier
+	Urls  []string // list for download tasks
+	Delay int // expressed in milliseconds
+	Sync  bool // wether the download tasks should be performed sync or async
 }
 
+// Wait waits for the duration of j.Delay, coverted into a time duration expressed
+// in milliseconds.
+func (j *Job) Wait() {
+	d, _ := time.ParseDuration(fmt.Sprintf("%dms", j.Delay))
+	<-time.After(d)
+}
+
+var proxyAddr = flag.String("proxy", "", "optional proxy address")
 var input = flag.String("job", "job.json", "input job file formatted in json")
-var verbose = flag.Bool("verbose", false, "enables verbose mode")
 
 func main() {
 	flag.Parse()
@@ -62,7 +69,10 @@ func main() {
 
 	t := &http.Transport{
 		Proxy: func(*http.Request) (*url.URL, error) {
-			return url.Parse("socks5://localhost:1080")
+			if *proxyAddr != "" {
+				return url.Parse(*proxyAddr)
+			}
+			return nil, nil
 		},
 		DisableCompression: false,
 		DisableKeepAlives:  true,
@@ -120,7 +130,7 @@ func (c *Client) handleJobAsync(job *Job) {
 		}(v)
 
 		// wait before firing the next job
-		<-time.After(job.Delay)
+		job.Wait()
 	}
 	wg.Wait()
 }
