@@ -1,7 +1,13 @@
 [
 	{
 		"id": "job #1",
-		"urls": [],
+		"urls": [
+			"http://tecnoporto.co:8080/empty_file_1mb",
+			"http://tecnoporto.co:8080/empty_file_2mb",
+			"http://tecnoporto.co:8080/empty_file_4mb",
+			"http://tecnoporto.co:8080/empty_file_16mb",
+			"http://tecnoporto.co:8080/empty_file_32mb"
+		],
 		"delay": 500,
 		"sync": false
 	}
