@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package speedtest_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -26,15 +27,17 @@ import (
 
 func TestResult_Bandwidth(t *testing.T) {
 	tt := []struct {
-		res speedtest.Result
-		u   time.Duration
+		res *speedtest.Result
 		out float64
-	}{}
+	}{
+		{res: &speedtest.Result{ElapsedTime: time.Second*3, ContentLength: 300}, out: 100.0},
+	}
 
-	for _, v := range tt {
-		r := v.res.Bandwidth(v.u)
+	for i, v := range tt {
+		r := v.res.Bandwidth()
 		if r != v.out {
-			t.Fatalf("wanted %.3f, found %.3f", v.out, r)
+			fmt.Printf("%+v\n", v.res)
+			t.Fatalf("%d: wanted %.3f, found %.3f", i, v.out, r)
 		}
 	}
 }

@@ -82,15 +82,12 @@ func (c *Client) handleJobAsync(job *Job) {
 type Result struct {
 	Start         time.Time
 	End           time.Time
+	ElapsedTime   time.Duration
 	ContentLength int64
 }
 
-func (r *Result) ElapsedTime() time.Duration {
-	return r.End.Sub(r.Start)
-}
-
-func (r *Result) Bandwidth(u time.Duration) float64 {
-	return 10.0
+func (r *Result) Bandwidth() float64 {
+	return float64(int64(r.ContentLength) / int64(r.ElapsedTime.Seconds()))
 }
 
 func (c *Client) FetchAndDiscard(addr string) (*Result, error) {
@@ -108,6 +105,7 @@ func (c *Client) FetchAndDiscard(addr string) (*Result, error) {
 	return &Result{
 		Start:         start,
 		End:           end,
+		ElapsedTime:   end.Sub(start),
 		ContentLength: resp.ContentLength,
 	}, nil
 }
