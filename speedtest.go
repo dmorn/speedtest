@@ -28,9 +28,9 @@ import (
 
 // Job describes a speedtest job.
 type Job struct {
-	ID    string   // job identifier
-	Urls  []string // list for download tasks
-	Delay int      // expressed in milliseconds
+	ID    string   `json:"id"`    // job identifier
+	Urls  []string `json:"urls"`  // list for download tasks
+	Delay int      `json:"delay"` // expressed in milliseconds
 }
 
 // Wait waits for the duration of j.Delay, coverted into a time duration expressed
