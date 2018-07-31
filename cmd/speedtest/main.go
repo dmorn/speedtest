@@ -69,7 +69,7 @@ func main() {
 	}
 
 	start := time.Now()
-	fmt.Printf("Start time: %v\n", start)
+	fmt.Printf("Start time: %v\n\n", start)
 
 	for _, j := range jobs {
 		client.HandleJob(j)

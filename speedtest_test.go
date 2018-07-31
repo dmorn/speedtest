@@ -30,7 +30,7 @@ func TestResult_Bandwidth(t *testing.T) {
 		res *speedtest.Result
 		out float64
 	}{
-		{res: &speedtest.Result{ElapsedTime: time.Second*3, ContentLength: 300}, out: 100.0},
+		{res: &speedtest.Result{ElapsedTime: time.Second * 3, ContentLength: 300}, out: 100.0},
 	}
 
 	for i, v := range tt {

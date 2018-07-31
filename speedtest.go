@@ -26,11 +26,11 @@ import (
 	"time"
 )
 
+// Job describes a speedtest job.
 type Job struct {
 	ID    string   // job identifier
 	Urls  []string // list for download tasks
 	Delay int      // expressed in milliseconds
-	Sync  bool     // wether the download tasks should be performed sync or async
 }
 
 // Wait waits for the duration of j.Delay, coverted into a time duration expressed
@@ -40,45 +40,42 @@ func (j *Job) Wait() {
 	<-time.After(d)
 }
 
-
+// Client is a wrapper around an http client.
 type Client struct {
 	*http.Client
 }
 
+// HandleJob calls FetchAndDiscard for each address in the url list, printing the
+// results to standard output.
 func (c *Client) HandleJob(job *Job) {
 	start := time.Now()
-	fmt.Printf("[%v] handling job...\n", job.ID)
-	if job.Sync {
-		c.handleJobSync(job)
-	} else {
-		c.handleJobAsync(job)
-	}
+	fmt.Printf("[%v] Handling job...\n", job.ID)
 
-	fmt.Printf("[%v] done (%v).\n", job.ID, time.Now().Sub(start))
-}
-
-func (c *Client) handleJobSync(job *Job) {
-	for _, v := range job.Urls {
-		c.FetchAndDiscard(v)
-	}
-}
-
-func (c *Client) handleJobAsync(job *Job) {
 	var wg sync.WaitGroup
 	for _, v := range job.Urls {
 		wg.Add(1)
 
 		go func(addr string) {
 			defer wg.Done()
-			c.FetchAndDiscard(addr)
+
+			res, err := c.FetchAndDiscard(addr)
+			if err != nil {
+				fmt.Printf("[%v] error: %v\n", job.ID, err)
+				return
+			}
+
+			fmt.Printf("[%v] Downloaded: %v (elapsed: %v, bandwidth: %v)\n", job.ID, addr, res.ElapsedTime, res.Bandwidth().String())
 		}(v)
 
 		// wait before firing the next job
 		job.Wait()
 	}
 	wg.Wait()
+
+	fmt.Printf("[%v] Done (%v).\n", job.ID, time.Now().Sub(start))
 }
 
+// Result contains information about a download task.
 type Result struct {
 	Start         time.Time
 	End           time.Time
@@ -86,10 +83,20 @@ type Result struct {
 	ContentLength int64
 }
 
-func (r *Result) Bandwidth() float64 {
-	return float64(int64(r.ContentLength) / int64(r.ElapsedTime.Seconds()))
+type bandwidth float64
+
+// Bandwidth returns the number of bytes transferred per second.
+func (r *Result) Bandwidth() bandwidth {
+	return bandwidth(float64(r.ContentLength) / float64(r.ElapsedTime.Seconds()))
 }
 
+func (b bandwidth) String() string {
+	return fmt.Sprintf("%.2fmb/s", b)
+}
+
+// FetchAndDiscard performs a GET request, returns an error if the request is
+// not successful, otherwise returns a Result, containing metrics about the
+// request performed.
 func (c *Client) FetchAndDiscard(addr string) (*Result, error) {
 	start := time.Now()
 
