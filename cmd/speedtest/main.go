@@ -18,12 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package main
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"net/http"
-	"net/url"
 	"os"
 	"time"
 
@@ -51,22 +48,7 @@ func main() {
 
 	fmt.Printf("Test is starting...\n\n")
 
-	t := &http.Transport{
-		Proxy: func(*http.Request) (*url.URL, error) {
-			if *proxyAddr != "" {
-				return url.Parse(*proxyAddr)
-			}
-			return nil, nil
-		},
-		DisableCompression: false,
-		DisableKeepAlives:  true,
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-		},
-	}
-	client := &speedtest.Client{
-		&http.Client{Transport: t},
-	}
+	client := speedtest.NewClient(*proxyAddr)
 
 	start := time.Now()
 	fmt.Printf("Start time: %v\n\n", start)

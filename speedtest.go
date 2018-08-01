@@ -18,9 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package speedtest
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/url"
 	"net/http"
 	"sync"
 	"time"
@@ -43,6 +45,25 @@ func (j *Job) Wait() {
 // Client is a wrapper around an http client.
 type Client struct {
 	*http.Client
+}
+
+func NewClient(proxyAddr string) *Client {
+	t := &http.Transport{
+		Proxy: func(*http.Request) (*url.URL, error) {
+			if proxyAddr != "" {
+				return url.Parse(proxyAddr)
+			}
+			return nil, nil
+		},
+		DisableCompression: false,
+		DisableKeepAlives:  true,
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
+	return &Client{
+		&http.Client{Transport: t},
+	}
 }
 
 // HandleJob calls FetchAndDiscard for each address in the url list, printing the
@@ -90,8 +111,9 @@ func (r *Result) Bandwidth() bandwidth {
 	return bandwidth(float64(r.ContentLength) / float64(r.ElapsedTime.Seconds()))
 }
 
+// String returns bandwidth converted into megabit per second.
 func (b bandwidth) String() string {
-	return fmt.Sprintf("%.2fmb/s", b)
+	return fmt.Sprintf("%.2fmb/s", b * 8 / 100)
 }
 
 // FetchAndDiscard performs a GET request, returns an error if the request is
