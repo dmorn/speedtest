@@ -70,7 +70,6 @@ func NewClient(proxyAddr string) *Client {
 // results to standard output.
 func (c *Client) HandleJob(job *Job) {
 	start := time.Now()
-	fmt.Printf("[%v] Handling job...\n", job.ID)
 
 	var wg sync.WaitGroup
 	for _, v := range job.Urls {
@@ -78,6 +77,8 @@ func (c *Client) HandleJob(job *Job) {
 
 		go func(addr string) {
 			defer wg.Done()
+
+			fmt.Printf("[%v] Fetching: %v (%v)\n", job.ID, addr, time.Now())
 
 			res, err := c.FetchAndDiscard(addr)
 			if err != nil {
@@ -101,19 +102,19 @@ type Result struct {
 	Start         time.Time
 	End           time.Time
 	ElapsedTime   time.Duration
-	ContentLength int64
+	ContentLength int64 // Payload content size expressed in bytes.
 }
 
 type bandwidth float64
 
 // Bandwidth returns the number of bytes transferred per second.
 func (r *Result) Bandwidth() bandwidth {
-	return bandwidth(float64(r.ContentLength) / float64(r.ElapsedTime.Seconds()))
+	return bandwidth(float64(r.ContentLength)/ float64(r.ElapsedTime.Seconds()))
 }
 
-// String returns bandwidth converted into megabit per second.
+// String returns bandwidth converted into megabytes per second.
 func (b bandwidth) String() string {
-	return fmt.Sprintf("%.2fmb/s", b * 8 / 100)
+	return fmt.Sprintf("%.2fMB/s", b / 1024 / 1024)
 }
 
 // FetchAndDiscard performs a GET request, returns an error if the request is

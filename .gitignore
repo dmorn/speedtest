@@ -15,3 +15,5 @@ bin/
 
 # vim related
 *.swp
+
+job.json
