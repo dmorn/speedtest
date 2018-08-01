@@ -12,3 +12,6 @@
 *.out
 
 bin/
+
+# vim related
+*.swp
