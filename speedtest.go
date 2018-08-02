@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/url"
 	"net/http"
+	"net/url"
 	"sync"
 	"time"
 )
@@ -109,12 +109,12 @@ type bandwidth float64
 
 // Bandwidth returns the number of bytes transferred per second.
 func (r *Result) Bandwidth() bandwidth {
-	return bandwidth(float64(r.ContentLength)/ float64(r.ElapsedTime.Seconds()))
+	return bandwidth(float64(r.ContentLength) / float64(r.ElapsedTime.Seconds()))
 }
 
 // String returns bandwidth converted into megabytes per second.
 func (b bandwidth) String() string {
-	return fmt.Sprintf("%.2fMB/s", b / 1024 / 1024)
+	return fmt.Sprintf("%.2fMB/s", b/1024/1024)
 }
 
 // FetchAndDiscard performs a GET request, returns an error if the request is
